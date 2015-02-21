@@ -27,7 +27,7 @@ namespace :slack do
       start_time = fetch(:start_time)
       elapsed = end_time.to_i - start_time.to_i
 
-      announcement = "#{announced_deployer} successfully deployed #{announced_application_name} to #{announced_path} in #{elapsed} seconds."
+      announcement = "#{announced_deployer} successfully deployed #{announced_application_name} in #{elapsed} seconds."
 
       post_slack_message(announcement)
     else
@@ -42,10 +42,6 @@ namespace :slack do
 
   def announced_deployer
     deployer
-  end
-
-  def announced_path
-    "#{domain}:#{deploy_to}"
   end
 
   def short_revision
