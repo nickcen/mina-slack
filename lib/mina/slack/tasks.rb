@@ -11,10 +11,10 @@ after_mina :deploy, :'slack:finished'
 namespace :slack do
 
   task :starting do
-    if slack_token and slack_room and slack_subdomain
-      announcement = "#{announced_deployer} is deploying #{announced_application_name} to #{announced_stage}"
+    if slack_url
+      # announcement = "#{announced_deployer} is deploying #{announced_application_name} to #{announced_stage}"
 
-      post_slack_message(announcement)
+      # post_slack_message(announcement)
       set(:start_time, Time.now)
     else
       print_local_status "Unable to create Slack Announcement, no slack details provided."
@@ -22,12 +22,12 @@ namespace :slack do
   end
 
   task :finished do
-    if slack_token and slack_room and slack_subdomain
+    if slack_url
       end_time = Time.now
       start_time = fetch(:start_time)
       elapsed = end_time.to_i - start_time.to_i
 
-      announcement = "#{announced_deployer} successfully deployed #{announced_application_name} in #{elapsed} seconds."
+      announcement = "#{announced_deployer} successfully deployed #{announced_application_name} to #{announced_path} in #{elapsed} seconds."
 
       post_slack_message(announcement)
     else
@@ -44,6 +44,10 @@ namespace :slack do
     deployer
   end
 
+  def announced_path
+    "#{domain}:#{deploy_to}"
+  end
+
   def short_revision
     deployed_revision[0..7] if deployed_revision
   end
@@ -58,7 +62,7 @@ namespace :slack do
 
   def post_slack_message(message)
     # Parse the URI and handle the https connection
-    uri = URI.parse("https://#{slack_subdomain}.slack.com/services/hooks/incoming-webhook?token=#{slack_token}")
+    uri = URI.parse(slack_url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
